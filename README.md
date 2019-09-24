@@ -38,7 +38,7 @@ Step 2 : Download the pre-trained model and detection files as described in Deep
 
          https://drive.google.com/open?id=18fKzfqnqhqW3s9zwsCbnVJ5XF2JFeqMp
 
-You will get two folers : detections/, networks/. Place them in /home/[MyNameHere]/Pedestrian_in_few_shots/deep_sort
+You will get two folders : detections/, networks/. Place them in /home/[MyNameHere]/Pedestrian_in_few_shots/deep_sort
 
 Step 3 : Pick a video and generate its hypotheses.txt file. I choose MOT16-03 in deep_sort/test/ folder for illustration; feel free to pick others.
 
@@ -79,6 +79,10 @@ cd /home/[MyNameHere]/Pedestrian_in_few_shots
 bash runMe.sh
 ```
 
+## Results
+
+![TrainFig](plots/trainbatch-20-09-2019-20:09:05-grid-6000.png)
+
 ## Acknowledgements
 Special thanks to https://github.com/conormdurkan for his implementation of the Neural Statistician paper from which this repo draws heavily on.
 
@@ -87,7 +91,7 @@ Special thanks to https://github.com/conormdurkan for his implementation of the 
 
 [1] Wojke, N., Bewley, A., & Paulus, D. (2017, September). Simple online and realtime tracking with a deep association metric. In 2017 IEEE International Conference on Image Processing (ICIP) (pp. 3645-3649). IEEE.
 
-[2] Edwards, H., & Storkey, A. (2016). Towards a neural statistician. arXiv preprint ![arXiv:1606.02185](https://arxiv.org/pdf/1606.02185.pdf)
+[2] Edwards, H., & Storkey, A. (2016). Towards a neural statistician. arXiv preprint [arXiv:1606.02185](https://arxiv.org/pdf/1606.02185.pdf)
 
 [3] https://github.com/conormdurkan/neural-statistician
 
