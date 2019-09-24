@@ -3,7 +3,7 @@
 This repository combines two recent deep learning algorithms to do something cool. It shows how to learn transient objects like pedestrian in real time video from a self-driving car. It brings together _Deep SORT_[1], an object segmentation and tracking alogirhtm with the few-shot _Neural Statistician_[2] to create a generator for pedestrian behavior. 
 
 
-## Dependencies
+### Dependencies
 Code has been tested on
 
 * torch 1.2.0
@@ -14,7 +14,7 @@ Code has been tested on
 * tqdm 4.32.1
 
 
-## Installation
+### Installation
 ```
 cd /home/[MyNameHere]
 git clone https://github.com/htso/Pedestrian_in_few_shots.git
@@ -22,7 +22,7 @@ cd Pedestrian_in_few_shots
 git clone https://github.com/nwojke/deep_sort.git
 ```
 
-## Generate data
+### Generate data
 I assume you've cloned this github to /home/[MyNameHere]/Pedestrian_in_few_shots
 
 Step 1 : Download MOT16 data from 
@@ -84,7 +84,7 @@ This will create a directory structure in data/ as follow,
             ...                       ....                                  ...
 ```
 
-## Run Experiment
+### Run Experiment
 
 Edit the parameters in runMe.sh, then
 
@@ -93,15 +93,17 @@ cd /home/[MyNameHere]/Pedestrian_in_few_shots
 bash runMe.sh
 ```
 
-## Results
+### Results
 
 ![TrainFig](plots/trainbatch-20-09-2019-20:09:05-grid-6000.png)
 
-## Acknowledgements
+### Acknowledgements
 Special thanks to https://github.com/conormdurkan for his implementation[3] of the Neural Statistician paper from which this repo draws heavily.
 
+### Contact
+To ask questions or report issues, please open an issue on the [issues tracker](https://github.com/htso/Pedestrian_in_few_shots/issues).
 
-## References
+### References
 
 [1] Wojke, N., Bewley, A., & Paulus, D. (2017, September). Simple online and realtime tracking with a deep association metric. In 2017 IEEE International Conference on Image Processing (ICIP) (pp. 3645-3649). IEEE.
 
