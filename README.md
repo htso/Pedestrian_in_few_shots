@@ -1,6 +1,6 @@
 # Catch Transient Objects in a Few Shots
 
-This repository combines two recent deep learning algorithms to do something cool. It shows how to learn transient objects like pedestrian in real time video from a self-driving car. It brings together Deep SORT[1][3], an object segmentation and tracking alogirhtm with the few-shot Neural Statistician[2][4] to create a generator for pedestrian clips. 
+This repository combines two recent deep learning algorithms to do something cool. It shows how to learn transient objects like pedestrian in real time video from a self-driving car. It brings together _Deep SORT_[1], an object segmentation and tracking alogirhtm with the few-shot _Neural Statistician_[2] to create a generator for pedestrian behavior. 
 
 
 ## Dependencies
@@ -84,7 +84,7 @@ bash runMe.sh
 ![TrainFig](plots/trainbatch-20-09-2019-20:09:05-grid-6000.png)
 
 ## Acknowledgements
-Special thanks to https://github.com/conormdurkan for his implementation of the Neural Statistician paper from which this repo draws heavily.
+Special thanks to https://github.com/conormdurkan for his implementation[3] of the Neural Statistician paper from which this repo draws heavily.
 
 
 ## References
