@@ -40,7 +40,7 @@ Step 2 : Download the pre-trained model and detection files as described in Deep
 
 You will get two folders : `detections/`, `networks/`. Place them in /home/[MyNameHere]/Pedestrian_in_few_shots/deep_sort
 
-Step 3 : Pick a video and generate the detection file. I choose MOT16-03 in deep_sort/test/ folder for illustration; feel free to pick others.
+Step 3 : Pick a video and generate the tracking file. I choose MOT16-03 in deep_sort/test/ folder for illustration; feel free to pick others.
 
          cd /home/[MyNameHere]/Pedestrian_in_few_shots/deep_sort
 
@@ -68,7 +68,21 @@ Step 4 : Run generate_MOT_dat.py,
               --max_height=160 \
               --max_width=96 
 
-The data to run Neural Stat are now in data/.
+This will create a directory structure in data/ as follow,
+
+```
+                                            data
+                                             |
+             -----------------------------------------------------------------
+             |                          |                                    |
+          PERSON1                   PERSON2            ....              PERSON169
+             |                          |                                    |
+           VIDEO                      VIDEO                                VIDEO
+             |                          |                                    | 
+        P103Fr309.jpg              P107Fr336.jpg                       P159Fr517.jpg
+        P103Fr310.jpg              P107Fr337.jpg                       P159Fr518.jpg
+            ...                       ....                                  ...
+```
 
 ## Run Experiment
 

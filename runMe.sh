@@ -12,5 +12,5 @@ python motrun.py \
      --viz-interval=1000 \
      --save_interval=1000 \
      --clip-gradients=True \
-     --data-dir=MOT16PERSON/  \
+     --data-dir=data/  \
      --output-dir=output/ \
