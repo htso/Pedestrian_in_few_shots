@@ -1,0 +1,16 @@
+python motrun.py \
+     --epochs=6000  \
+     --batch-size=5 \
+     --sample-size=8 \
+     --c-dim=512 \
+     --n-hidden-statistic=1  \
+     --hidden-dim-statistic=2000  \
+     --n-stochastic=1 \
+     --z-dim=16 \
+     --n-hidden=1 \
+     --hidden-dim=2000  \
+     --viz-interval=1000 \
+     --save_interval=1000 \
+     --clip-gradients=True \
+     --data-dir=MOT16PERSON/  \
+     --output-dir=output/ \
