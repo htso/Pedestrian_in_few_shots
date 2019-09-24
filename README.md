@@ -29,8 +29,7 @@ Step 1 : Download MOT16 data from
 
          https://motchallenge.net/data/MOT16/
 
-         Under heading "Download" in middle of page, click "Download all data (1.9 Gb)". 
-         Put MOT16.zip in /home/[MyNameHere]/Pedestrian_in_few_shots/data,
+Under heading "Download" in middle of page, click "Download all data (1.9 Gb)". Put MOT16.zip in /home/[MyNameHere]/Pedestrian_in_few_shots/data,
 
          cd /home/[MyNameHere]/Pedestrian_in_few_shots/data
          unzip MOT16.zip
@@ -39,7 +38,7 @@ Step 2 : Download the pre-trained model and detection files as described in Deep
 
          https://drive.google.com/open?id=18fKzfqnqhqW3s9zwsCbnVJ5XF2JFeqMp
 
-         You will get two folers : detections/, networks/. Place them in /home/[MyNameHere]/Pedestrian_in_few_shots/deep_sort
+You will get two folers : detections/, networks/. Place them in /home/[MyNameHere]/Pedestrian_in_few_shots/deep_sort
 
 Step 3 : Pick a video and generate its hypotheses.txt file. I choose MOT16-03 in deep_sort/test/ folder for illustration; feel free to pick others.
 
@@ -55,7 +54,7 @@ Step 3 : Pick a video and generate its hypotheses.txt file. I choose MOT16-03 in
               --nms_max_overlap=1.0 \
               --max_cosine_distance=0.2         
 
-         This will create a file 'hypotheses.txt' in /home/[MyNameHere]/Pedestrian_in_few_shots.
+This will create a file 'hypotheses.txt' in /home/[MyNameHere]/Pedestrian_in_few_shots.
 
 Step 4 : Run generate_MOT_dat.py,
 
