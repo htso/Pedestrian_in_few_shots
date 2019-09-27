@@ -1,7 +1,7 @@
 python motrun.py \
-     --epochs=6000  \
-     --batch-size=5 \
-     --sample-size=8 \
+     --epochs=10000  \
+     --batch-size=4 \
+     --K=5 \
      --c-dim=512 \
      --n-hidden-statistic=1  \
      --hidden-dim-statistic=2000  \
@@ -9,8 +9,8 @@ python motrun.py \
      --z-dim=16 \
      --n-hidden=1 \
      --hidden-dim=2000  \
-     --viz-interval=1000 \
-     --save_interval=1000 \
+     --viz-interval=2000 \
+     --save_interval=2000 \
      --clip-gradients=True \
-     --data-dir=data/  \
+     --data-dir=/mnt/ClearWaterBay/Deep_SORT_data/MOT16_for_NeuralStat  \
      --output-dir=output/ \

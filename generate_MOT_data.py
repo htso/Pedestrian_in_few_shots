@@ -23,6 +23,7 @@
 import argparse
 import sys
 import os
+import glob
 import time
 import math
 import numpy as np
@@ -35,7 +36,23 @@ import pathlib
 # video_dir = '/mnt/ClearWaterBay/Deep_SORT_data/MOT16/test/'
 # out_dir = '/mnt/ClearWaterBay/Deep_SORT_data/'
 
-# ===== Timothy's code =============================================================
+def parse_args():
+    parser = argparse.ArgumentParser(description="Create MOT16 video dataset for Neural Statistician")
+    parser.add_argument(
+        "--the_video", help="One of the 7 videos, eg. MOT16-03", default='MOT16-14', required=False)
+    parser.add_argument(
+        "--hypo_file", help="Name of the detection txt file, eg. MOT1604_hypotheses.txt.", default='/mnt/ClearWaterBay/Deep_SORT_data/MOT1614_hypotheses.txt', required=False)
+    parser.add_argument(
+        "--video_dir", help="Path to the video.", default="/mnt/ClearWaterBay/MOT16_Data/MOT16/test", required=False)
+    parser.add_argument(
+        "--out_dir", help="Top directory to create the subdirectories for each person and write the frame images.", default="/mnt/ClearWaterBay/Deep_SORT_data/output_dir", required=False)
+    parser.add_argument(
+        "--max_height", help="Maximum height of the final image to be used in Neural Statistician", default=160, type=int)
+    parser.add_argument(
+        "--max_width", help="Maximum width of the final image to be used in Neural Statistician", default=96, type=int)
+    return parser.parse_args()
+
+# Timothy's code 
 def merge_image(img1, img2):
     shape1 = img1.shape[:-1]
     shape2 = img2.shape[:-1]
@@ -45,7 +62,6 @@ def merge_image(img1, img2):
         outimage[:shape2[0], :shape2[1], i] = img2[:, :, i]
         outimage[:shape1[0], :shape1[1], i] = img1[:, :, i]
     return outimage
-# ==================================================================================
 
 def scale_to_fit(img, max_height, max_width): 
     h = img.shape[0]
@@ -57,89 +73,130 @@ def scale_to_fit(img, max_height, max_width):
     img_scaled = cv2.resize(img, None, fx=a_ratio, fy=a_ratio, interpolation=cv2.INTER_CUBIC)
     return img_scaled
 
-def run(the_video, detected_fnm, max_width, max_height, video_dir, out_dir, verbose=False):
-    print('video : ', the_video)
+def calc_extended_coordinates(x, y, h, w, aspect_ratio): 
+    '''
+    Calculate the new coordinates, height, width of the extended pedestrian image based on 
+    the given aspect ratio.
+    '''
+    assert aspect_ratio > 0
+    if h > w:
+        h_E = h
+        y_E = y
+        w_E = h_E / aspect_ratio
+        x_E = max(0, x + 0.5*(w - w_E))
+    else:
+        w_E = w
+        x_E = x
+        h_E = aspect_ratio * w_E
+        y_E = max(0, y + 0.5*(h - h_E))
+    return int(x_E), int(y_E), int(w_E), int(h_E)
 
+def extend_image(full_img, x, y, h, w, aspect_ratio):
+    x_E, y_E, w_E, h_E = calc_extended_coordinates(x, y, h, w, aspect_ratio)
+    img_E = full_img[y_E:(y_E+h_E),x_E:(x_E+w_E),:]
+    return img_E
+
+def scale_to_fixed_size(img, height, width):
+    y_ratio = float(height) / float(img.shape[0])
+    x_ratio = float(width) / float(img.shape[1])
+    img_scaled = cv2.resize(img, None, fx=x_ratio, fy=y_ratio, interpolation=cv2.INTER_CUBIC)
+    return img_scaled
+
+def run(the_video, hypo_fnm, fixed_width, fixed_height, video_dir, out_dir, min_frames=10, verbose=False):
+    print('video : ', the_video)
     image_dir = video_dir + '/' + the_video + '/' + 'img1'
     image_filenames = {
         int(os.path.splitext(f)[0]): os.path.join(image_dir, f)
         for f in os.listdir(image_dir)}
 
-    det_mat = np.loadtxt(detected_fnm, delimiter=',')
-    blank_mask = np.zeros((max_height, max_width, 3))
-
-    N = det_mat.shape[0]
-    print('N :', N)
-    fr_ix = np.sort(np.unique(det_mat[:,0]), axis=0)
-    print('fr_ix shape :', fr_ix.shape)
-    person_ix = np.sort(np.unique(det_mat[:,1]), axis=0)
+    # read hypotheses.txt
+    hypo_mat = np.loadtxt(hypo_fnm, delimiter=',')
+    N = hypo_mat.shape[0]
+    fr_ix = np.sort(np.unique(hypo_mat[:,0]), axis=0)
+    person_ix = np.sort(np.unique(hypo_mat[:,1]), axis=0)
     person_ix = person_ix.astype(int)
+    print('number of entries in %s : %d' %(hypo_fnm, N) )
+    print('fr_ix shape :', fr_ix.shape)
     print('person_ix shape :', person_ix.shape)
-    Nfr = fr_ix.shape[0]
+
+    Nfr = fr_ix.shape[0] # number of frames
     Nperson = person_ix.shape[0]
     Nlabel = Nperson
-    print('Nfr : %d\t Nperson : %d\t Nlabel : %d\n' %(Nfr, Nperson, Nlabel))
+    print('Nfr : %d\t Nperson : %d\n' %(Nfr, Nperson))
 
-    # Skip a person if it has fewer than 20 frames
+    # Skip a person if it has fewer than 10 frames
     per_ix = []
     for i in range(len(person_ix)):
-        if len(np.where(det_mat[:,1] == person_ix[i])[0]) > 20:
+        if len(np.where(hypo_mat[:,1] == person_ix[i])[0]) > min_frames:
             per_ix.append(person_ix[i])
-    print('Person with more than 20 frames :')
+    print('Person with more than 10 frames :')
     print(per_ix)
 
-    for i in range(len(fr_ix)): # loop thru the 1500 frames of a video
+    aspect_ratio = float(fixed_height / fixed_width)
+    k = [1]*len(per_ix)
+
+    for i in range(len(fr_ix)): # loop thru the jpg files in the /MOT16-xx/img1/ folder
         if verbose is True:
             print('i :', i)
         # get the file name of the image frame
         fnm = image_filenames[fr_ix[i]]
+        if verbose is True:
+            print('fnm :', fnm)
         # load the image, which is just a 3D numpy array
         img = cv2.imread(fnm)
         # find all the persons in this image
-        ix = np.where(det_mat[:,0] == fr_ix[i])[0]
-        for j in range(len(ix)): # loop thru all the persons 
+        ix = np.where(hypo_mat[:,0] == fr_ix[i])[0]
+        
+        for j in range(len(ix)): # loop thru all the persons in hypo file
             if verbose is True:
                 print('j : ', j)
-            this_guy = int(det_mat[ix[j],1])
+
+            this_guy = int(hypo_mat[ix[j],1])
             # skip if this person is not in the per_ix list
             if this_guy not in per_ix:
                 continue
 
-            person_dir = out_dir + '/PERSON' + str(this_guy) + '/VIDEO'
-            pathlib.Path(person_dir).mkdir(parents=True, exist_ok=True) 
+            w = int(hypo_mat[ix[j],4])
+            h = int(hypo_mat[ix[j],5])
 
-            x = int(det_mat[ix[j],2])
-            y = int(det_mat[ix[j],3])
-            w = int(det_mat[ix[j],4])
-            h = int(det_mat[ix[j],5])
-            x = max(x, 0)
-            y = max(y, 0)
-            img1 = img[y:(y+h),x:(x+w),:]
-            img_s = scale_to_fit(img1, 160, 96)
-            img2 = merge_image(img_s, blank_mask)
-            img2 = img2.astype(np.uint8)
+            # if the person image is too small (both height and width less than 80% of max) then skip it
+            if w < int(fixed_width*0.8) and h < int(fixed_height*0.8):
+                continue
+            
+            x = max(0, int(hypo_mat[ix[j],2])) # for some strange reason, some hypo coordinates are negative!
+            y = max(0, int(hypo_mat[ix[j],3]))
+
+            img_E = extend_image(img, x, y, h, w, aspect_ratio)
+            if verbose is True:
+                 print('img_E shape : ', img_E.shape)  
+
+            img_fixed_size = scale_to_fixed_size(img_E, fixed_height, fixed_width)
+            if verbose is True:
+                print('img_fixed_size shape : ', img_fixed_size.shape)  
+            
+            assert img_fixed_size.shape[0] == fixed_height
+            assert img_fixed_size.shape[1] == fixed_width
+
+            img2 = img_fixed_size.astype(np.uint8)
             im = Image.fromarray(img2)
+
+            ixx = per_ix.index(this_guy) 
+            if verbose is True:
+                print('ixx : ', ixx)
+                print('k[ixx]: ', k[ixx])
+            person_dir = out_dir + '/' + the_video + '_PERSON' + str(this_guy) + '/VIDEO' + str(k[ixx])
+            pathlib.Path(person_dir).mkdir(parents=True, exist_ok=True)
+            # check how many files are currently in person_dir. if more than 10, then create
+            # a new VIDEOn directory and save the new frame to the new directory. 
+            ff = glob.glob(person_dir + '/*.jpg')
+            if len(ff) >= 10:
+                k[ixx] = k[ixx] + 1
+                person_dir = out_dir + '/' + the_video + '_PERSON' + str(this_guy) + '/VIDEO' + str(k[ixx])
+                pathlib.Path(person_dir).mkdir(parents=True, exist_ok=True)
+
             vnm = person_dir + '/' + 'P' + str(this_guy) + 'Fr' + str(i) + '.jpg'
             im.save(vnm)
 
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Create MOT16 video dataset for Neural Statistician")
-    parser.add_argument(
-        "--the_video", help="One of the 7 videos, eg. MOT16-03", default='MOT16-08', required=True)
-    parser.add_argument(
-        "--detection_file", help="Name of the detection txt file, eg. MOT1603_hypotheses.txt.", default='MOT1608_hypotheses.txt', required=True)
-    parser.add_argument(
-        "--video_dir", help="Path to the video.", default="/mnt/ClearWaterBay/Deep_SORT_data/MOT16/test", required=True)
-    parser.add_argument(
-        "--out_dir", help="Top directory to create the subdirectories for each person and write the frame images.", default="/mnt/ClearWaterBay/Deep_SORT_data/MOT16_for_NeuralStat", required=True)
-    parser.add_argument(
-        "--max_height", help="Maximum height of the final image to be used in Neural Statistician", default=160, type=int)
-    parser.add_argument(
-        "--max_width", help="Maximum width of the final image to be used in Neural Statistician", default=96, type=int)
-    return parser.parse_args()
-
-
 if __name__ == "__main__":
     args = parse_args()
-    run(args.the_video, args.detection_file, args.max_width, args.max_height, args.video_dir, args.out_dir, verbose=False)
+    run(args.the_video, args.hypo_file, args.max_width, args.max_height, args.video_dir, args.out_dir, verbose=False)

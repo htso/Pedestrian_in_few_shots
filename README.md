@@ -105,7 +105,7 @@ To ask questions or report issues, please open an issue on the [issues tracker](
 
 ### References
 
-[1] Wojke, N., Bewley, A., & Paulus, D. (2017, September). Simple online and realtime tracking with a deep association metric. In 2017 IEEE International Conference on Image Processing (ICIP) (pp. 3645-3649). IEEE.
+[1] Wojke, N., Bewley, A., & Paulus, D. (2017, September). Simple online and realtime tracking with a deep association metric. In 2017 IEEE International Conference on Image Processing (ICIP) (pp. 3645-3649). IEEE. [arXiv preprint](https://arxiv.org/pdf/1703.07402.pdf)
 
 [2] Edwards, H., & Storkey, A. (2016). Towards a neural statistician. arXiv preprint [arXiv:1606.02185](https://arxiv.org/pdf/1606.02185.pdf)
 

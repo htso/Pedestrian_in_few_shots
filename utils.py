@@ -23,20 +23,22 @@ def kl_diagnormal_stdnormal(mean, logvar):
     d = -logvar
     return 0.5 * torch.sum(a + b + c + d)
 
-# This code is checked against the follow SO calculation : 
-#      https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
-# NOTATION :
-#   q_mean = mu_1
-#   p_mean = mu_2
-#   q_logvar = log(sigma_1 ^ 2)
-#   p_logvar = log(sigma_2 ^ 2)
-#
-# SO formula,
-#
-#   KL(q, p) = log(sigma_2/sigma_1) - 1/2 + ((mu_1 - mu_2)^2 + sigma_1^2) / 2*sigma_2^2
-#
 def kl_diagnormal_diagnormal(q_mean, q_logvar, p_mean, p_logvar):
-    # Ensure correct shapes since no numpy broadcasting yet
+    '''
+    This code is checked against the follow stackoverflow calculation : 
+    https://stats.stackexchange.com/questions/7440/kl-divergence-between-two-univariate-gaussians
+    NOTATION :
+       q_mean = mu_1
+       p_mean = mu_2
+       q_logvar = log(sigma_1 ^ 2)
+       p_logvar = log(sigma_2 ^ 2)
+
+    SO formula,
+
+       KL(q, p) = log(sigma_2/sigma_1) - 1/2 + ((mu_1 - mu_2)^2 + sigma_1^2) / 2*sigma_2^2
+
+    NOTE : ensure correct shapes since no numpy broadcasting yet
+    '''
     p_mean = p_mean.expand_as(q_mean)
     p_logvar = p_logvar.expand_as(q_logvar)
 
@@ -45,3 +47,5 @@ def kl_diagnormal_diagnormal(q_mean, q_logvar, p_mean, p_logvar):
     c = - q_logvar
     d = ((q_mean - p_mean)**2 + torch.exp(q_logvar)) / torch.exp(p_logvar)
     return 0.5 * torch.sum(a + b + c + d)
+
+
